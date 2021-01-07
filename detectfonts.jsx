@@ -1,20 +1,20 @@
 var p = new ActionReference();
 
-function arrayUnique(a){
+function arrayUnique(a) {
     var t = []
-        i = a.length;
+    i = a.length;
 
-    while(i--) {
+    while (i--) {
         var f = false,
-        n = t.length;
+            n = t.length;
 
         while (n--) {
-            if(a[i] === t[n]) {
+            if (a[i] === t[n]) {
                 f = true;
             }
         }
 
-        if(!f) {
+        if (!f) {
             t.push(a[i]);
         }
     }
@@ -22,18 +22,18 @@ function arrayUnique(a){
 }
 
 function findFonts() {
-    p.putEnumerated( charIDToTypeID('Dcmn'), charIDToTypeID('Ordn'), charIDToTypeID('Trgt') );
+    p.putEnumerated(charIDToTypeID('Dcmn'), charIDToTypeID('Ordn'), charIDToTypeID('Trgt'));
 
-    var c = executeActionGet(p).getInteger(charIDToTypeID('NmbL'))+1,
+    var c = executeActionGet(p).getInteger(charIDToTypeID('NmbL')) + 1,
         fonts = [];
 
-    while(c--) {
+    while (c--) {
         var r = new ActionReference(),
             descLayer,
             layerStyles,
             countStyles;
 
-        r.putIndex( charIDToTypeID( 'Lyr ' ), c );
+        r.putIndex(charIDToTypeID('Lyr '), c);
 
         try {
             descLayer = executeActionGet(r);
@@ -41,13 +41,18 @@ function findFonts() {
             continue;
         }
 
-        if(!descLayer.hasKey(stringIDToTypeID( 'textKey' ))) continue;
+        if (!descLayer.hasKey(stringIDToTypeID('textKey'))) continue;
 
         layerStyles = descLayer.getObjectValue(stringIDToTypeID('textKey')).getList(stringIDToTypeID('textStyleRange'));
+		if(!layerStyles) continue;
+			
         countStyles = layerStyles.count;
 
-        while(countStyles--) {
-            var n = layerStyles.getObjectValue(countStyles).getObjectValue(stringIDToTypeID('textStyle')).getString(stringIDToTypeID('fontPostScriptName'));
+        while (countStyles--) {
+			var textStyle = layerStyles.getObjectValue(countStyles).getObjectValue(stringIDToTypeID('textStyle'));
+			if(!textStyle || !textStyle.hasKey(stringIDToTypeID('fontPostScriptName'))) continue;
+			
+            var n = textStyle.getString(stringIDToTypeID('fontPostScriptName'));
             fonts.push(n);
         }
     }
@@ -57,7 +62,7 @@ function findFonts() {
 
 if (documents.length) {
     var d = findFonts();
-    alert(d.length +' fonts found\n'+d.join('\n'));
+    alert(d.length + ' fonts found\n' + d.join('\n'));
 } else {
-    alert('No fonts used in the active document.',);
+    alert('No fonts used in the active document.');
 }
